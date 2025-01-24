@@ -4,34 +4,6 @@ from utils_filings import *
 from config import DATAPATH, HEADERS, items_10k, items_10q
 
 
-def fetch_feed_items(response: requests.Response) -> list[dict]:
-
-    soup_items = bs4.BeautifulSoup(response.content, 'lxml-xml').find_all('item')
-    
-    items = []
-    for soup_item in soup_items:
-        
-        item = {}
-        for info in soup_item:
-            
-            if info.text:
-
-                if not item.get(info.name):
-                    item[info.name] = info.text
-
-                elif isinstance(item.get(info.name), list):
-                    item[info.name].append(info.text)
-
-                else:
-                    item[info.name] = [item[info.name]]
-                    item[info.name].append(info.text)
-                
-        item.pop(None)
-        items.append(item)
-
-    return items
-
-
 def download_company_filings(cik: str, form: str ='10-K', download_text=True, download_html=False, limit=1):
 
     try: ticker = get_ticker_from_cik(cik)
@@ -77,39 +49,6 @@ def download_company_filings(cik: str, form: str ='10-K', download_text=True, do
                     download_section(text_path)
 
     return True
-
-
-def update_filings():
-
-    url = 'https://www.sec.gov/Archives/edgar/usgaap.rss.xml'
-    items = fetch_feed_items(requests.get(url, headers=HEADERS))
-
-    for item in items:
-        if re.search('10-K', item['description']):
-
-            form = item['description']
-            cik = item['xbrlFiling'].split('\n')[4]
-        
-            download_company_filings(cik, form, True, True, 1)
-
-
-def get_company_embedding(ticker, model, max_seq=230, keep_n_first=3):
-    import glob
-    files = glob.glob(f'{DATAPATH}10-K_sections/1/202[0-9]/*')
-    files = [f for f in files if re.search(ticker.upper(), f)]
-    files.sort()
-    file_ = files[-1]
-    
-    ticker = file_.split('/')[-1].split('_')[0]
-
-    text = open(file_).read()[:100000]
-    text = re.sub('[0-9]', '', text)
-    tokens = text.split()
-    chunks = [' '.join(tokens[i*max_seq:(i+1)*max_seq]) for i in range(len(tokens)//230)]
-
-    embeddings = model.encode(chunks[:keep_n_first]).mean(axis=0)
-
-    return embeddings
 
 
 # FIRST WE DOWNLOAD A DF OF ALL PUBLICLY TRADED FIRMS FROM THE SEC
