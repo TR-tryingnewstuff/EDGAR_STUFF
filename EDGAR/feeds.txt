@@ -1,0 +1,6 @@
+https://www.sec.gov/news/pressreleases.rss
+https://www.sec.gov/news/speeches-statements.rss
+https://www.sec.gov/enforcement-litigation/litigation-releases/rss
+https://www.sec.gov/enforcement-litigation/administrative-proceedings/rss
+https://www.sec.gov/enforcement-litigation/trading-suspensions/rss
+https://www.sec.gov/Archives/edgar/usgaap.rss.xml
